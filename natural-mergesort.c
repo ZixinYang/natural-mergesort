@@ -53,10 +53,10 @@ static run_length_queue* run_length_queue_alloc(size_t capacity)
     }
     //初始化queue
     queue->capacity = capacity; //容量
-    queue->mask = capacity - 1; //環狀queue
+    queue->mask = capacity - 1; //環狀queue使用
     queue->head = 0; //起始
-    queue->tail = 0; //末
-    queue->size = 0; //在queue總數
+    queue->tail = 0; //末端
+    queue->size = 0; //在queue總數量
 
     return queue;
 }
@@ -125,9 +125,9 @@ build_run_length_queue(void* base,
     size_t run_length;
     bool previous_was_descending;
     void* swap_buffer = malloc(size);
-    queue = run_length_queue_alloc((num >> 1) + 1); //分配(num*/2+1)(會resize成2^n或256)的queue
+    queue = run_length_queue_alloc((num >> 1) + 1); //分配(num/2+1)(會resize成2^n或256)的queue
 
-    if (!queue) //alloc 失敗
+    if (!queue) //分配空間失敗
     {
         return NULL;
     }
@@ -296,7 +296,7 @@ static size_t get_number_of_leading_zeros(size_t number)
 static size_t get_number_of_merge_passes(size_t runs) 
 {   //計算size-clz
     return sizeof(size_t) * BITS_PER_BYTE - 
-           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8次(00.0001000)變成一次 共有3層
+           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8次(0001000)變成一次 共有3層
 }
 
 /*
@@ -364,14 +364,14 @@ void stable_sort(void* base, size_t num, size_t size, int (*comparator)(const vo
         target = buffer;
     }// 資料的更新狀況 -> buffer ->base -> buffer ->base -> buffer ->base
 
-    offset = 0;
+    offset = 0; //資料邊移量
     runs_remaining = run_length_queue_size(queue); //取得queue的size總數
-
+    // runs_remaining:剩餘在queue內未處理的數量
     while (run_length_queue_size(queue) > 1) 
     {
         left_run_length  = run_length_queue_dequeue(queue); //取得左陣列大小
         right_run_length = run_length_queue_dequeue(queue); //取得右陣列大小
-        /*merge*/
+        
         merge(source,
               target,
               size,
