@@ -35,7 +35,7 @@ static run_length_queue* run_length_queue_alloc(size_t capacity)
     capacity = max(capacity, MINIMUM_RUN_LENGTH_QUEUE_CAPACITY);
     capacity = fix_capacity(capacity); //become 2^n
 
-    queue = malloc(sizeof(*queue)); //allococate memory for self
+    queue = malloc(sizeof(*queue)); //allocate memory for self
 
     if (!queue) {  //if failed
         return NULL;
@@ -265,7 +265,7 @@ static size_t get_number_of_merge_passes(size_t runs)
 {
     //calculate size-clz
     return sizeof(size_t) * BITS_PER_BYTE -
-           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8(0001000)to 1  3 levels
+           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8runs(0001000)to 1  3 levels
 }
 
 /*
@@ -328,7 +328,7 @@ void stable_sort(void *base, size_t num, size_t size, int (*comparator)(const vo
         target = buffer;
     }// update state -> buffer ->base -> buffer ->base -> buffer ->base
 
-    offset = 0; //資料邊移量
+    offset = 0; //data offset
     runs_remaining = run_length_queue_size(queue); //get queue's size
     // runs_remaining:the number of block in queue which is not tackled yet
     while (run_length_queue_size(queue) > 1) {

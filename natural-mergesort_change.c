@@ -7,91 +7,87 @@ typedef struct run_length_queue {
     size_t mask;
 } run_length_queue;
 
-//取得2的倍數
+//get 2^n
 static size_t fix_capacity(size_t capacity)
 {
     size_t ret = 1;
 
-    while (ret < capacity) 
-    {
+    while (ret < capacity) {
         ret <<= 1;
     }
 
     return ret;
 }
 
-static size_t max(size_t a, size_t b) 
+static size_t max(size_t a, size_t b)
 {
     return a > b ? a : b;
 }
 
-static const size_t MINIMUM_RUN_LENGTH_QUEUE_CAPACITY = 256; //最小的queue storage length
+static const size_t MINIMUM_RUN_LENGTH_QUEUE_CAPACITY = 256; //minimum queue storage length
 static const size_t BITS_PER_BYTE = 8;
 
-static run_length_queue* run_length_queue_alloc(size_t capacity) 
+static run_length_queue* run_length_queue_alloc(size_t capacity)
 {
     run_length_queue* queue;
 
-    //選擇較大的capacity
+    //choose larger capacity
     capacity = max(capacity, MINIMUM_RUN_LENGTH_QUEUE_CAPACITY);
-    capacity = fix_capacity(capacity); //變成2^n
+    capacity = fix_capacity(capacity); //become 2^n
 
-    queue = malloc(sizeof(*queue)); //自身malloc空間
+    queue = malloc(sizeof(*queue)); //allocate memory for self
 
-    if (!queue) //malloc queue失敗
-    {
+    if (!queue) { //if failed
         return NULL;
     }
 
-    //為queue的storage分配capacity的空間(單位為int)
+    //allocate memory for queue->storage (length:capacity type:int)
     queue->storage = malloc(sizeof(int) * capacity);
 
-    if (!queue->storage) //malloc queue storage失敗
-    {
+    if (!queue->storage) { //failed to malloc queue storage
         free(queue);
         return NULL;
     }
-    //初始化queue
-    queue->capacity = capacity; //容量
-    queue->mask = capacity - 1; //環狀queue使用
-    queue->head = 0; //起始
-    queue->tail = 0; //末端
-    queue->size = 0; //在queue總數量
+    //initialize queue
+    queue->capacity = capacity;
+    queue->mask = capacity - 1; //for circular queue
+    queue->head = 0; //starting point
+    queue->tail = 0; //end point
+    queue->size = 0; //total in queue
 
     return queue;
 }
 
-static void run_length_queue_enqueue(run_length_queue* queue, size_t run_size)//從尾端加上一個值
+static void run_length_queue_enqueue(run_length_queue* queue, size_t run_size)//add a value on tail
 {
     queue->storage[queue->tail] = run_size;//why storage is array? and put run_size(what) in the tail of storage?
     queue->tail = (queue->tail + 1) & queue->mask;//why "& queue->mask"??
     queue->size++;
 }
 
-static void run_length_queue_add_to_last(run_length_queue* queue, 
-                                         size_t run_size)
+static void run_length_queue_add_to_last(run_length_queue* queue,
+        size_t run_size)
 {
     queue->storage[(queue->tail - 1) & queue->mask] += run_size;
 }
 
-static size_t run_length_queue_dequeue(run_length_queue* queue)//從頭刪除一個值
+static size_t run_length_queue_dequeue(run_length_queue* queue)//delete a value from head
 {
-    size_t run_length = queue->storage[queue->head];//run_length 接收要跑的位置
+    size_t run_length = queue->storage[queue->head];//run_length receive position
     queue->head = (queue->head + 1) & queue->mask;
     queue->size--;
     return run_length;
 }
 
-static size_t run_length_queue_size(run_length_queue* queue) 
+static size_t run_length_queue_size(run_length_queue* queue)
 {
     return queue->size;
 }
 
-static void run_length_queue_free(run_length_queue* queue) 
+static void run_length_queue_free(run_length_queue* queue)
 {
-    if (queue && queue->storage)//有刪除queue的值？
-    {
-        free(queue->storage);//是否有memory leak的疑慮
+    if (queue && queue->storage) { //if delete queue value?
+        free(queue->storage);//prevent memory leak
     }
 }
 
@@ -100,8 +96,7 @@ static void reverse_run(char* base, size_t num, size_t size, void* swap_buffer)
     size_t left = 0;
     size_t right = num - 1;
 
-    while (left < right)
-    {
+    while (left < right) {
         memcpy(swap_buffer, base + size * left, size);
         memcpy(base + size * left, base + size * right, size);
         memcpy(base + size * right, swap_buffer, size);
@@ -111,11 +106,11 @@ static void reverse_run(char* base, size_t num, size_t size, void* swap_buffer)
     }
 }
 
-static run_length_queue* 
-build_run_length_queue(void* base, 
+static run_length_queue*
+build_run_length_queue(void* base,
                        size_t num,
                        size_t size,
-                       int (*cmp)(const void*, const void*)) 
+                       int (*cmp)(const void*, const void*))
 {
     run_length_queue* queue;
     size_t head;
@@ -125,87 +120,69 @@ build_run_length_queue(void* base,
     size_t run_length;
     bool previous_was_descending;
     void* swap_buffer = malloc(size);
-    queue = run_length_queue_alloc((num >> 1) + 1); //分配(num/2+1)(會resize成2^n或256)的queue
+    queue = run_length_queue_alloc((num >> 1) + 1); //allocate (num/2+1) size (will resize to 2^n or 256)  queue
 
-    if (!queue) //分配空間失敗
-    {
+    if (!queue) { //if failed
         return NULL;
     }
-    //初始化
+    //initialize
     left = 0;
     right = 1;
     last = num - 1;
     previous_was_descending = false;
 
-    while (left < last)
-    {
+    while (left < last) {
         head = left;
 
         /* Decide the direction of the next run. */
-        if (cmp(((char*) base) + size * left++, 
-                ((char*) base) + size * right++) <= 0)
-        {
+        if (cmp(((char*) base) + size * left++,
+                ((char*) base) + size * right++) <= 0) {
             /* The run is ascending. */
-            while (left < last 
-                    && cmp(((char*) base) + size * left, 
-                           ((char*) base) + size * right) <= 0) 
-            {
+            while (left < last
+                    && cmp(((char*) base) + size * left,
+                           ((char*) base) + size * right) <= 0) {
                 ++left;
                 ++right;
             }
-            //計算長度
+            //calculate length
             run_length = left - head + 1;
-
-            if (previous_was_descending)//如果前一個是遞減型(實際上已經變成了遞增) 檢查是否可以合併
-            {                           //data 會呈現 遞減 遞增 遞減 遞增......... 只有前一個是遞減才有機會合併
-                if (cmp(((char*) base) + (head - 1) * size, 
-                        ((char*) base) + head * size) <= 0)
-                {
+            //if previous is descending (acturally it became ascending) , check if this can combine with it
+            //data will become desc asc desc asc ... it may be combined only if previous is descending
+            if (previous_was_descending) {
+                if (cmp(((char*) base) + (head - 1) * size,
+                        ((char*) base) + head * size) <= 0) {
                     run_length_queue_add_to_last(queue, run_length);
-                }
-                else
-                {
+                } else {
                     run_length_queue_enqueue(queue, run_length);
                 }
-            }
-            else
-            {
+            } else {
                 run_length_queue_enqueue(queue, run_length);
             }
 
             previous_was_descending = false;
-        }
-        else
-        {
+        } else {
             /* Scan a strictly descending run. */
             while (left < last
-                    && cmp(((char*) base) + size * left, 
-                           ((char*) base) + size * right) > 0)
-            {
+                    && cmp(((char*) base) + size * left,
+                           ((char*) base) + size * right) > 0) {
                 ++left;
                 ++right;
             }
 
             run_length = left - head + 1;
-            reverse_run(((char*) base) + head * size, 
+            reverse_run(((char*) base) + head * size,
                         run_length,
-                        size, 
+                        size,
                         swap_buffer);
 
-            if (previous_was_descending)
-            {
-                if (cmp(((char*) base) + size * (head - 1), 
-                        ((char*) base) + size * head) <= 0) 
-                {
+            if (previous_was_descending) {
+                if (cmp(((char*) base) + size * (head - 1),
+                        ((char*) base) + size * head) <= 0) {
                     run_length_queue_add_to_last(queue, run_length);
-                }
-                else
-                {
+                } else {
                     run_length_queue_enqueue(queue, run_length);
                 }
-            }
-            else
-            {
+            } else {
                 run_length_queue_enqueue(queue, run_length);
             }
 
@@ -216,15 +193,11 @@ build_run_length_queue(void* base,
         ++right;
     }
 
-    if (left == last) //處理最後一個元素
-    {
-        if (cmp(((char*) base) + size * (last - 1), 
-                ((char*) base) + size * last) <= 0) 
-        {
+    if (left == last) { //tackle last element
+        if (cmp(((char*) base) + size * (last - 1),
+                ((char*) base) + size * last) <= 0) {
             run_length_queue_add_to_last(queue, 1);
-        }
-        else 
-        {
+        } else {
             run_length_queue_enqueue(queue, 1);
         }
     }
@@ -239,7 +212,7 @@ void merge(void* source,
            size_t offset,
            size_t left_run_length,
            size_t right_run_length,
-           int (*cmp)(const void*, const void*)) 
+           int (*cmp)(const void*, const void*))
 {
     size_t left  = offset;
     size_t right = left + left_run_length;
@@ -247,18 +220,14 @@ void merge(void* source,
     const size_t right_bound = right + right_run_length;
     size_t target_index = offset;
 
-    while (left < left_bound && right < right_bound)
-    {
-        if (cmp(((char*) source) + size * right, 
-                ((char*) source) + size * left) < 0)//cmp() means? 
-        {
-            memcpy(((char*) target) + size * target_index, 
+    while (left < left_bound && right < right_bound) {
+        if (cmp(((char*) source) + size * right,
+                ((char*) source) + size * left) < 0) { //cmp() means?
+            memcpy(((char*) target) + size * target_index,
                    ((char*) source) + size * right,
                    size);
             ++right;
-        } 
-        else
-        {
+        } else {
             memcpy(((char*) target) + size * target_index,
                    ((char*) source) + size * left,
                    size);
@@ -268,7 +237,7 @@ void merge(void* source,
         ++target_index;
     }
 
-    memcpy(((char*) target) + size * target_index, 
+    memcpy(((char*) target) + size * target_index,
            ((char*) source) + size * left,
            (left_bound - left) * size);
 
@@ -279,13 +248,12 @@ void merge(void* source,
 
 static size_t get_number_of_leading_zeros(size_t number)
 {
-    size_t mask = 1; 
+    size_t mask = 1;
     size_t number_of_leading_zeros = 0;
 
     mask <<= (sizeof number) * BITS_PER_BYTE - 1;
 
-    while (mask && ((mask & number) == 0))
-    {
+    while (mask && ((mask & number) == 0)) {
         ++number_of_leading_zeros;
         mask >>= 1;
     }
@@ -294,16 +262,17 @@ static size_t get_number_of_leading_zeros(size_t number)
 }
 
 static size_t get_number_of_merge_passes(size_t runs) //not understand
-{   //計算size-clz
-    return sizeof(size_t) * BITS_PER_BYTE - 
-           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8次(0001000)變成一次 共有3層
+{
+    //calculate size-clz
+    return sizeof(size_t) * BITS_PER_BYTE -
+           get_number_of_leading_zeros(runs - 1); //runs-1 ex:8runs(0001000)to 1 3 levels
 }
 
 /*
-base :陣列指標
-num :資料數量
-size :單位大小
-comparator:比較函數
+base :array pointer
+num :data number
+size :size of each element
+comparator:comparator function
 */
 void stable_sort(void* base, size_t num, size_t size, int (*comparator)(const void*, const void*))
 {
@@ -324,54 +293,48 @@ void stable_sort(void* base, size_t num, size_t size, int (*comparator)(const vo
     size_t right_run_length;
 
     //if wrong input
-    if (!base || !comparator || num < 2 || size == 0)
-    {
+    if (!base || !comparator || num < 2 || size == 0) {
         return;
     }
 
     buffer = malloc(num * size);
 
-    //無法分配buffer空間 >>> 改用qsort
-    if (!buffer)
-    {
+    //if failed to allocate memory for buffer >>> use qsort
+    if (!buffer) {
         qsort(base, num, size, comparator);
         return;
     }
 
-    //建立queue
+    //build queue
     queue = build_run_length_queue(base, num, size, comparator);
 
-    if (!queue) 
-    {
-        /* Cannot allocate the run length queue. Resort to qsort and possibly 
+    if (!queue) {
+        /* Cannot allocate the run length queue. Resort to qsort and possibly
            fail in the same manner as qsort. */
         qsort(base, num, size, comparator);
         return;
     }
 
-    //計算總共需要merge幾"層"
+    //calculate the "level" of merge
     merge_passes = get_number_of_merge_passes(run_length_queue_size(queue));
 
-    if ((merge_passes & 1) == 1) //如果為奇數
-    {
+    if ((merge_passes & 1) == 1) { //if odd
         source = buffer;
         target = base;
-        memcpy(buffer, base, num * size); //先把資料複製進buffer buffer為source
-    }// 資料的更新狀況 -> base -> buffer ->base -> buffer ->base
-    else  // 如果為偶數 ->不用copy 直接以 base為source 最終target也為source
-    {
+        memcpy(buffer, base, num * size); //copy data to buffer,buffer is source
+    }// update state -> base -> buffer ->base -> buffer ->base
+    else { // if even ->don't copy, base is source,final target is base
         source = base;
         target = buffer;
-    }// 資料的更新狀況 -> buffer ->base -> buffer ->base -> buffer ->base
+    }// update state -> buffer ->base -> buffer ->base -> buffer ->base
 
-    offset = 0; //資料邊移量
-    runs_remaining = run_length_queue_size(queue); //取得queue的size總數
-    // runs_remaining:剩餘在queue內未處理的數量
-    while (run_length_queue_size(queue) > 1) 
-    {
-        left_run_length  = run_length_queue_dequeue(queue); //取得左陣列大小
-        right_run_length = run_length_queue_dequeue(queue); //取得右陣列大小
-        
+    offset = 0; //data offset
+    runs_remaining = run_length_queue_size(queue); //get queue's size
+    // runs_remaining:the number of block in queue which is not tackled yet
+    while (run_length_queue_size(queue) > 1) {
+        left_run_length  = run_length_queue_dequeue(queue); //get left array size
+        right_run_length = run_length_queue_dequeue(queue); //get right array size
+
         merge(source,
               target,
               size,
@@ -380,31 +343,30 @@ void stable_sort(void* base, size_t num, size_t size, int (*comparator)(const vo
               right_run_length,
               comparator);
 
-        run_length_queue_enqueue(queue, left_run_length + right_run_length); //放入queue中
+        run_length_queue_enqueue(queue, left_run_length + right_run_length); //put into queue
         runs_remaining -= 2;
         offset += left_run_length + right_run_length;
 
-        switch (runs_remaining)
-        {
-            case 1: //如果剩一個無人配對
-                tail_run_length = run_length_queue_dequeue(queue); //dequeue它
+        switch (runs_remaining) {
+            case 1: //if these remains one block which can't make a pair
+                tail_run_length = run_length_queue_dequeue(queue); //pop
                 memcpy(((char*) target) + offset * size,
                        ((char*) source) + offset * size,
                        size * tail_run_length);
-                run_length_queue_enqueue(queue, tail_run_length); //enqueue它
-                /* FALL THROUGH! */ /*接著繼續進行!!*/
+                run_length_queue_enqueue(queue, tail_run_length); //push
+            /* FALL THROUGH! */
 
             case 0:
-                runs_remaining = run_length_queue_size(queue); //重新取得queue大小
-                offset = 0; //重設為0
-                /*交換source 與 target*/
+                runs_remaining = run_length_queue_size(queue); //reget queue
+                offset = 0; //initialize to zero
+                /*change source and target*/
                 tmp = source;
                 source = target;
                 target = tmp;
                 break;
         }
     }
-    //free掉queue buffer
+    //free queue buffer
     run_length_queue_free(queue);
     free(buffer);
-} 
+}
