@@ -1,11 +1,5 @@
-typedef struct run_length_queue {
-    int *storage;
-    size_t capacity;
-    size_t head;
-    size_t tail;
-    size_t size;
-    size_t mask;
-} run_length_queue;
+#include "natural-mergesort.h"
+#include <string.h>
 
 //get 2^n
 static size_t fix_capacity(size_t capacity)
@@ -23,9 +17,6 @@ static size_t max(size_t a, size_t b)
 {
     return a > b ? a : b;
 }
-
-static const size_t MINIMUM_RUN_LENGTH_QUEUE_CAPACITY = 256; //minimum queue storage length
-static const size_t BITS_PER_BYTE = 8;
 
 static run_length_queue* run_length_queue_alloc(size_t capacity)
 {

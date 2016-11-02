@@ -1,12 +1,6 @@
-typedef struct run_length_queue {
-    int *storage;
-    size_t capacity;
-    size_t head;
-    size_t tail;
-    size_t size;
-    size_t mask;
-} run_length_queue;
-
+#ifndef _NATURAL_MERGESORT_CHANGE_H
+#define _NATURAL_MERGESORT_CHANGE_H
+#include <string.h>
 //get 2^n
 static size_t fix_capacity(size_t capacity)
 {
@@ -23,9 +17,6 @@ static size_t max(size_t a, size_t b)
 {
     return a > b ? a : b;
 }
-
-static const size_t MINIMUM_RUN_LENGTH_QUEUE_CAPACITY = 256; //minimum queue storage length
-static const size_t BITS_PER_BYTE = 8;
 
 static run_length_queue* run_length_queue_alloc(size_t capacity)
 {
@@ -60,8 +51,15 @@ static run_length_queue* run_length_queue_alloc(size_t capacity)
 
 static void run_length_queue_enqueue(run_length_queue *queue, size_t run_size)//add a value on tail
 {
-    queue->storage[queue->tail] = run_size;//why storage is array? and put run_size(what) in the tail of storage?
-    queue->tail = (queue->tail + 1) & queue->mask;//why "& queue->mask"??
+    queue->storage[queue->tail] = run_size;
+    //why storage is array? and put run_size(what) in the tail of storage?
+    //A: it just store block length, and we can access a block of data by
+    //1.use length to calc the block starting index(offset) 2. know the length of block
+    queue->tail = (queue->tail + 1) & queue->mask;
+    //why "& queue->mask"??
+    /*A: use for circular queue, i.e. if queue size=256 mask=255 (0111 1111)
+      when current tail value=255, next tail value = 256(1000 0000) & mask(0111 1111) = 0 (0000 0000)
+      tail value will back to zero , and never exceed 255 to prevent invalid index */
     queue->size++;
 }
 
@@ -86,7 +84,7 @@ static size_t run_length_queue_size(run_length_queue *queue)
 
 static void run_length_queue_free(run_length_queue *queue)
 {
-    if (queue && queue->storage) { //if delete queue value?
+    if (queue && queue->storage) { //if delete queue value? //A: queue'll delete at the end of stable_sort()
         free(queue->storage);//prevent memory leak
     }
 }
@@ -222,7 +220,7 @@ void merge(void *source,
 
     while (left < left_bound && right < right_bound) {
         if (cmp(((char*) source) + size * right,
-                ((char*) source) + size * left) < 0) { //cmp() means?
+                ((char*) source) + size * left) < 0) { //cmp() means? //A: user-defined comparasion function
             memcpy(((char*) target) + size * target_index,
                    ((char*) source) + size * right,
                    size);
@@ -263,6 +261,9 @@ static size_t get_number_of_leading_zeros(size_t number)
 
 static size_t get_number_of_merge_passes(size_t runs) //not understand
 {
+    /*A: this function will decide the number of iteration of the while loop in stable_sort()
+      the return value will decide where pointers point to ,
+      see the comments in stable_sort() for more information  */
     //calculate size-clz
     return sizeof(size_t) * BITS_PER_BYTE -
            get_number_of_leading_zeros(runs - 1); //runs-1 ex:8runs(0001000)to 1 3 levels
@@ -370,3 +371,5 @@ void stable_sort(void *base, size_t num, size_t size, int (*comparator)(const vo
     run_length_queue_free(queue);
     free(buffer);
 }
+
+#endif
