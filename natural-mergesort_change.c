@@ -1,5 +1,5 @@
 typedef struct run_length_queue {
-    int*   storage;
+    int *storage;
     size_t capacity;
     size_t head;
     size_t tail;
@@ -29,7 +29,7 @@ static const size_t BITS_PER_BYTE = 8;
 
 static run_length_queue* run_length_queue_alloc(size_t capacity)
 {
-    run_length_queue* queue;
+    run_length_queue *queue;
 
     //choose larger capacity
     capacity = max(capacity, MINIMUM_RUN_LENGTH_QUEUE_CAPACITY);
@@ -58,20 +58,20 @@ static run_length_queue* run_length_queue_alloc(size_t capacity)
     return queue;
 }
 
-static void run_length_queue_enqueue(run_length_queue* queue, size_t run_size)//add a value on tail
+static void run_length_queue_enqueue(run_length_queue *queue, size_t run_size)//add a value on tail
 {
     queue->storage[queue->tail] = run_size;//why storage is array? and put run_size(what) in the tail of storage?
     queue->tail = (queue->tail + 1) & queue->mask;//why "& queue->mask"??
     queue->size++;
 }
 
-static void run_length_queue_add_to_last(run_length_queue* queue,
+static void run_length_queue_add_to_last(run_length_queue *queue,
         size_t run_size)
 {
     queue->storage[(queue->tail - 1) & queue->mask] += run_size;
 }
 
-static size_t run_length_queue_dequeue(run_length_queue* queue)//delete a value from head
+static size_t run_length_queue_dequeue(run_length_queue *queue)//delete a value from head
 {
     size_t run_length = queue->storage[queue->head];//run_length receive position
     queue->head = (queue->head + 1) & queue->mask;
@@ -79,19 +79,19 @@ static size_t run_length_queue_dequeue(run_length_queue* queue)//delete a value 
     return run_length;
 }
 
-static size_t run_length_queue_size(run_length_queue* queue)
+static size_t run_length_queue_size(run_length_queue *queue)
 {
     return queue->size;
 }
 
-static void run_length_queue_free(run_length_queue* queue)
+static void run_length_queue_free(run_length_queue *queue)
 {
     if (queue && queue->storage) { //if delete queue value?
         free(queue->storage);//prevent memory leak
     }
 }
 
-static void reverse_run(char* base, size_t num, size_t size, void* swap_buffer)
+static void reverse_run(char *base, size_t num, size_t size, void *swap_buffer)
 {
     size_t left = 0;
     size_t right = num - 1;
@@ -107,19 +107,19 @@ static void reverse_run(char* base, size_t num, size_t size, void* swap_buffer)
 }
 
 static run_length_queue*
-build_run_length_queue(void* base,
+build_run_length_queue(void *base,
                        size_t num,
                        size_t size,
                        int (*cmp)(const void*, const void*))
 {
-    run_length_queue* queue;
+    run_length_queue *queue;
     size_t head;
     size_t left;
     size_t right;
     size_t last;
     size_t run_length;
     bool previous_was_descending;
-    void* swap_buffer = malloc(size);
+    void *swap_buffer = malloc(size);
     queue = run_length_queue_alloc((num >> 1) + 1); //allocate (num/2+1) size (will resize to 2^n or 256)  queue
 
     if (!queue) { //if failed
@@ -206,8 +206,8 @@ build_run_length_queue(void* base,
     return queue;
 }
 
-void merge(void* source,
-           void* target,
+void merge(void *source,
+           void *target,
            size_t size,
            size_t offset,
            size_t left_run_length,
@@ -274,16 +274,16 @@ num :data number
 size :size of each element
 comparator:comparator function
 */
-void stable_sort(void* base, size_t num, size_t size, int (*comparator)(const void*, const void*))
+void stable_sort(void *base, size_t num, size_t size, int (*comparator)(const void*, const void*))
 {
     size_t i;
 
-    run_length_queue* queue;
+    run_length_queue *queue;
 
-    void* buffer;
-    void* source;
-    void* target;
-    void* tmp;
+    void *buffer;
+    void *source;
+    void *target;
+    void *tmp;
 
     size_t offset;
     size_t merge_passes;
