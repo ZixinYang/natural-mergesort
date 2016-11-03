@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "natural-mergesort_change.h"
-#define OPT 1
 
 //get 2^n
 size_t fix_capacity(size_t capacity)
