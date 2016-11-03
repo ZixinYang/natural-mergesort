@@ -52,13 +52,17 @@ int main()
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
+    FILE *out_time_file = fopen("orig_runtime.txt","a");
+    cpu_time = diff_in_second(start,end);
+    fprintf(out_time_file,"%lf\n", cpu_time);
 #else
     FILE *out_file = fopen("change_ans.txt","w");
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
-#endif
+    FILE *out_time_file = fopen("opt_runtime.txt","a");
     cpu_time = diff_in_second(start,end);
-    printf("%lf\n",cpu_time);
+    fprintf(out_time_file,"%lf\n", cpu_time);
+#endif
     return 0;
 }

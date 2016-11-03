@@ -251,17 +251,7 @@ void merge(void *source,
 
 size_t get_number_of_leading_zeros(size_t number)
 {
-    size_t mask = 1;
-    size_t number_of_leading_zeros = 0;
-
-    mask <<= (sizeof number) * BITS_PER_BYTE - 1;
-
-    while (mask && ((mask & number) == 0)) {
-        ++number_of_leading_zeros;
-        mask >>= 1;
-    }
-
-    return number_of_leading_zeros;
+    return __builtin_clz(number);
 }
 
 size_t get_number_of_merge_passes(size_t runs) //not understand
