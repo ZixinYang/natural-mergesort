@@ -1,3 +1,5 @@
 *.txt
 *.o
 gen_testcase
+natural-mergesort
+natural-mergesort_change

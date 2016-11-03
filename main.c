@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 #include IMPL
@@ -24,7 +25,7 @@ int integer_cmp(const void *a,const void *b)
 int main()
 {
     struct timespec start,end;
-    size_t number;
+    int  number;
     size_t size;
     double cpu_time;
     int *input_array = NULL;    

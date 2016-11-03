@@ -2,10 +2,12 @@
 #define _NATURAL_MERGESORT_CHANGE_H
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include "natural-mergesort_change.h"
 #define OPT 1
 
 //get 2^n
-static size_t fix_capacity(size_t capacity)
+size_t fix_capacity(size_t capacity)
 {
     size_t ret = 1;
 
@@ -16,12 +18,12 @@ static size_t fix_capacity(size_t capacity)
     return ret;
 }
 
-static size_t max(size_t a, size_t b)
+size_t max(size_t a, size_t b)
 {
     return a > b ? a : b;
 }
 
-static run_length_queue* run_length_queue_alloc(size_t capacity)
+run_length_queue* run_length_queue_alloc(size_t capacity)
 {
     run_length_queue *queue;
 
@@ -52,7 +54,7 @@ static run_length_queue* run_length_queue_alloc(size_t capacity)
     return queue;
 }
 
-static void run_length_queue_enqueue(run_length_queue *queue, size_t run_size)//add a value on tail
+void run_length_queue_enqueue(run_length_queue *queue, size_t run_size)//add a value on tail
 {
     queue->storage[queue->tail] = run_size;
     //why storage is array? and put run_size(what) in the tail of storage?
@@ -66,13 +68,13 @@ static void run_length_queue_enqueue(run_length_queue *queue, size_t run_size)//
     queue->size++;
 }
 
-static void run_length_queue_add_to_last(run_length_queue *queue,
+void run_length_queue_add_to_last(run_length_queue *queue,
         size_t run_size)
 {
     queue->storage[(queue->tail - 1) & queue->mask] += run_size;
 }
 
-static size_t run_length_queue_dequeue(run_length_queue *queue)//delete a value from head
+size_t run_length_queue_dequeue(run_length_queue *queue)//delete a value from head
 {
     size_t run_length = queue->storage[queue->head];//run_length receive position
     queue->head = (queue->head + 1) & queue->mask;
@@ -80,19 +82,19 @@ static size_t run_length_queue_dequeue(run_length_queue *queue)//delete a value 
     return run_length;
 }
 
-static size_t run_length_queue_size(run_length_queue *queue)
+size_t run_length_queue_size(run_length_queue *queue)
 {
     return queue->size;
 }
 
-static void run_length_queue_free(run_length_queue *queue)
+void run_length_queue_free(run_length_queue *queue)
 {
     if (queue && queue->storage) { //if delete queue value? //A: queue'll delete at the end of stable_sort()
         free(queue->storage);//prevent memory leak
     }
 }
 
-static void reverse_run(char *base, size_t num, size_t size, void *swap_buffer)
+void reverse_run(char *base, size_t num, size_t size, void *swap_buffer)
 {
     size_t left = 0;
     size_t right = num - 1;
@@ -107,7 +109,7 @@ static void reverse_run(char *base, size_t num, size_t size, void *swap_buffer)
     }
 }
 
-static run_length_queue*
+run_length_queue*
 build_run_length_queue(void *base,
                        size_t num,
                        size_t size,
@@ -247,7 +249,7 @@ void merge(void *source,
            (right_bound - right) * size);
 }
 
-static size_t get_number_of_leading_zeros(size_t number)
+size_t get_number_of_leading_zeros(size_t number)
 {
     size_t mask = 1;
     size_t number_of_leading_zeros = 0;
@@ -262,7 +264,7 @@ static size_t get_number_of_leading_zeros(size_t number)
     return number_of_leading_zeros;
 }
 
-static size_t get_number_of_merge_passes(size_t runs) //not understand
+size_t get_number_of_merge_passes(size_t runs) //not understand
 {
     /*A: this function will decide the number of iteration of the while loop in stable_sort()
       the return value will decide where pointers point to ,
@@ -280,8 +282,6 @@ comparator:comparator function
 */
 void stable_sort(void *base, size_t num, size_t size, int (*comparator)(const void*, const void*))
 {
-    size_t i;
-
     run_length_queue *queue;
 
     void *buffer;
