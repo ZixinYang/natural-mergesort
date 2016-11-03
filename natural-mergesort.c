@@ -1,6 +1,6 @@
 #include "natural-mergesort.h"
+#include <stdlib.h>
 #include <string.h>
-
 //get 2^n
 static size_t fix_capacity(size_t capacity)
 {

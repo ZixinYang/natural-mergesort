@@ -1,6 +1,9 @@
 #ifndef _NATURAL_MERGESORT_CHANGE_H
 #define _NATURAL_MERGESORT_CHANGE_H
+#include <stdlib.h>
 #include <string.h>
+#define OPT 1
+
 //get 2^n
 static size_t fix_capacity(size_t capacity)
 {
