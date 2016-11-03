@@ -22,6 +22,12 @@ test: $(EXEC)
                 -e cache-misses,cache-references,instructions,cycles \
                 ./natural-mergesort_change
 
+genvcsv: runtime.csv
+	printf "orig," \
+	./natural-mergesort \
+	printf "optimized," \
+	./natural-mergesort_change > runtime.csv
+
 plot:
 	gnuplot runtime.gp
 
@@ -29,4 +35,4 @@ plot:
 
 clean:
 	rm -f \
-	$(EXEC) runtime.png runtime.txt
+	$(EXEC) runtime.png runtime.csv
