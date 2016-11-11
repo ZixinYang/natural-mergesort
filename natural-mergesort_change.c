@@ -221,6 +221,14 @@ void merge(void *source,
     const size_t left_bound = right;
     const size_t right_bound = right + right_run_length;
     size_t target_index = offset;
+
+    if (left_run_length + right_run_length < 7) {
+        qsort (source + left, left_run_length + right_run_length, size, cmp);
+        memcpy((char*) target + target_index, (char*) source + offset, size * (left_run_length + right_run_length));
+    }
+
+    else {
+
     int conti = 0, conti_times_right = 0, conti_times_left = 0;
 
     while (left + conti_times_left < left_bound && right + conti_times_right < right_bound) {
@@ -228,7 +236,7 @@ void merge(void *source,
             if (conti == 1 && conti_times_left != 0) {
                 memcpy(((char*) target) + size * target_index,
                        ((char*) source) + size * left,
-                       size*conti_times_left);
+                       size * conti_times_left);
                 left += conti_times_left;
                 target_index += conti_times_left;
                 conti_times_left = 0;
@@ -258,6 +266,9 @@ void merge(void *source,
     memcpy(((char*) target) + size * target_index,
            ((char*) source) + size * right,
            (right_bound - right) * size);
+
+    }
+
 }
 
 size_t get_number_of_leading_zeros(size_t number)
