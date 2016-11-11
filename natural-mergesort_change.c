@@ -221,22 +221,34 @@ void merge(void *source,
     const size_t left_bound = right;
     const size_t right_bound = right + right_run_length;
     size_t target_index = offset;
+    int conti = 0, conti_times_right = 0, conti_times_left = 0;
 
-    while (left < left_bound && right < right_bound) {
-        if (cmp(((char*) source) + size * right,
-                ((char*) source) + size * left) < 0) { //cmp() means? //A: user-defined comparasion function
-            memcpy(((char*) target) + size * target_index,
-                   ((char*) source) + size * right,
-                   size);
-            ++right;
+    while (left + conti_times_left < left_bound && right + conti_times_right < right_bound) {
+        if (cmp(((char*) source) + size * (right + conti_times_right), ((char*) source) + size * (left + conti_times_left)) < 0) {  //cmp() means? //A: user-defined comparasion function
+            if (conti == 1 && conti_times_left != 0) {
+                memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * left,
+                       size*conti_times_left);
+                left += conti_times_left;
+                target_index += conti_times_left;
+                conti_times_left = 0;
+                conti = 0;
+            }
+            conti = 0;
+            conti_times_right++;
         } else {
-            memcpy(((char*) target) + size * target_index,
-                   ((char*) source) + size * left,
-                   size);
-            ++left;
+            if (conti == 0 && conti_times_right != 0) {
+                memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * right,
+                       size*conti_times_right);
+                right += conti_times_right;
+                target_index += conti_times_right;
+                conti_times_right = 0;
+                conti = 1;
+            }
+            conti = 1;
+            conti_times_left++;
         }
-
-        ++target_index;
     }
 
     memcpy(((char*) target) + size * target_index,
