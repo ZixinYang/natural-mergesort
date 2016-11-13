@@ -4,19 +4,6 @@
 
 #include IMPL
 
-static double diff_in_second(struct timespec t1, struct timespec t2)
-{
-    struct timespec diff;
-    if (t2.tv_nsec-t1.tv_nsec < 0) {
-        diff.tv_sec  = t2.tv_sec - t1.tv_sec - 1;
-        diff.tv_nsec = t2.tv_nsec - t1.tv_nsec + 1000000000;
-    } else {
-        diff.tv_sec  = t2.tv_sec - t1.tv_sec;
-        diff.tv_nsec = t2.tv_nsec - t1.tv_nsec;
-    }
-    return (diff.tv_sec + diff.tv_nsec / 1000000000.0);
-}
-
 int integer_cmp(const void *a,const void *b)
 {
     return *(int *)a - *(int *)b;
@@ -24,7 +11,7 @@ int integer_cmp(const void *a,const void *b)
 
 int main()
 {
-    struct timespec start,end;
+    clock_t start,end;
     int  number;
     size_t size;
     double cpu_time;
@@ -44,21 +31,25 @@ int main()
         printf("Can't allocate memory\n");
         return -1;
     }
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    start = clock();
     stable_sort(input_array,number,size,integer_cmp);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    end = clock();
 #ifndef OPT
     FILE *out_file = fopen("orig_ans.txt","w");
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
+    FILE *out_time_file = fopen("orig_runtime.txt","a");
+    cpu_time = (double)(end-start)/CLOCKS_PER_SEC;
+    fprintf(out_time_file,"%lf\n", cpu_time);
 #else
     FILE *out_file = fopen("change_ans.txt","w");
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
+    FILE *out_time_file = fopen("opt_runtime.txt","a");
+    cpu_time = (double)(end-start)/CLOCKS_PER_SEC;
+    fprintf(out_time_file,"%lf\n", cpu_time);
 #endif
-    cpu_time = diff_in_second(start,end);
-    printf("%lf\n",cpu_time);
     return 0;
 }

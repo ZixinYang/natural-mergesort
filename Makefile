@@ -1,7 +1,7 @@
 CC ?= gcc
 CFLAGS ?= -O0 -Wall -std=gnu99
 SRCS = main.c
-EXEC = natural-mergesort natural-mergesort_change gen_testcase
+EXEC = natural-mergesort natural-mergesort_change gen_testcase calculate
 
 all: $(EXEC)
 
@@ -17,16 +17,20 @@ gen_testcase: gen_testcase.c
 test: $(EXEC)
 	perf stat --repeat 100 \
 		-e cache-misses,cache-references,instructions,cycles \
-		./natural-mergesort \
-        perf stat --repeat 100 \
+		./natural-mergesort
+test1: $(EXEC)
+	perf stat --repeat 100 \
                 -e cache-misses,cache-references,instructions,cycles \
                 ./natural-mergesort_change
 
-genvcsv: runtime.csv
-	printf "orig," \
-	./natural-mergesort \
-	printf "optimized," \
-	./natural-mergesort_change > runtime.csv
+gendata:
+	for i in `seq 0 1 100`; do \
+		./natural-mergesort;\
+		./natural-mergesort_change;\
+	done
+
+cal:
+	./calculate
 
 plot:
 	gnuplot runtime.gp
@@ -35,4 +39,4 @@ plot:
 
 clean:
 	rm -f \
-	$(EXEC) runtime.png runtime.csv
+	$(EXEC) runtime.png orig_runtime.txt opt_runtime.txt orig_ans.txt output.txt

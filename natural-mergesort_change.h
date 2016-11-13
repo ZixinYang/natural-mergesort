@@ -1,5 +1,5 @@
 #include <stddef.h>
-
+#define OPT 1
 typedef struct run_length_queue {
     int *storage;
     size_t capacity;
