@@ -12,7 +12,7 @@ int integer_cmp(const void *a,const void *b)
 int main()
 {
     clock_t start,end;
-    int  number;
+    int number;
     size_t size;
     double cpu_time;
     int *input_array = NULL;    
@@ -51,5 +51,6 @@ int main()
     cpu_time = (double)(end-start)/CLOCKS_PER_SEC;
     fprintf(out_time_file,"%lf\n", cpu_time);
 #endif
+    printf("%lf\n", cpu_time);
     return 0;
 }

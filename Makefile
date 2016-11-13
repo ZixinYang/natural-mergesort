@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS ?= -O0 -Wall -std=gnu99
+CFLAGS ?= -std=gnu99 -Wall -O0
 SRCS = main.c
 EXEC = natural-mergesort natural-mergesort_change gen_testcase calculate
 
