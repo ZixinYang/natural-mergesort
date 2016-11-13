@@ -215,6 +215,7 @@ void merge(void *source,
     while (left < left_bound && right < right_bound) {
         if (cmp(((char*) source) + size * right,
                 ((char*) source) + size * left) < 0) {
+            /* right is smaller */
             memcpy(((char*) target) + size * target_index,
                    ((char*) source) + size * right,
                    size);

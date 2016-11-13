@@ -222,21 +222,34 @@ void merge(void *source,
     const size_t right_bound = right + right_run_length;
     size_t target_index = offset;
 
-    while (left < left_bound && right < right_bound) {
-        if (cmp(((char*) source) + size * right,
-                ((char*) source) + size * left) < 0) { //cmp() means? //A: user-defined comparasion function
-            memcpy(((char*) target) + size * target_index,
-                   ((char*) source) + size * right,
-                   size);
-            ++right;
-        } else {
-            memcpy(((char*) target) + size * target_index,
-                   ((char*) source) + size * left,
-                   size);
-            ++left;
-        }
+    int conti = 0, conti_times_right = 0, conti_times_left = 0;
 
-        ++target_index;
+    while (left + conti_times_left < left_bound && right + conti_times_right < right_bound) {
+        if (cmp(((char*) source) + size * (right + conti_times_right), ((char*) source) + size * (left + conti_times_left)) < 0) {  //cmp() means? //A: user-defined comparasion function
+            if (conti == 1 && conti_times_left != 0) {
+                memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * left,
+                       size * conti_times_left);
+                left += conti_times_left;
+                target_index += conti_times_left;
+                conti_times_left = 0;
+                conti = 0;
+            }
+            conti = 0;
+            conti_times_right++;
+        } else {
+            if (conti == 0 && conti_times_right != 0) {
+                memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * right,
+                       size*conti_times_right);
+                right += conti_times_right;
+                target_index += conti_times_right;
+                conti_times_right = 0;
+                conti = 1;
+            }
+            conti = 1;
+            conti_times_left++;
+        }
     }
 
     memcpy(((char*) target) + size * target_index,
@@ -246,21 +259,12 @@ void merge(void *source,
     memcpy(((char*) target) + size * target_index,
            ((char*) source) + size * right,
            (right_bound - right) * size);
+
 }
 
 size_t get_number_of_leading_zeros(size_t number)
 {
-    size_t mask = 1;
-    size_t number_of_leading_zeros = 0;
-
-    mask <<= (sizeof number) * BITS_PER_BYTE - 1;
-
-    while (mask && ((mask & number) == 0)) {
-        ++number_of_leading_zeros;
-        mask >>= 1;
-    }
-
-    return number_of_leading_zeros;
+    return __builtin_clz(number);
 }
 
 size_t get_number_of_merge_passes(size_t runs) //not understand

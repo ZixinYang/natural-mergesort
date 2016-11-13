@@ -12,7 +12,7 @@ int integer_cmp(const void *a,const void *b)
 int main()
 {
     clock_t start,end;
-    int  number;
+    int number;
     size_t size;
     double cpu_time;
     int *input_array = NULL;    
@@ -39,13 +39,18 @@ int main()
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
+    FILE *out_time_file = fopen("orig_runtime.txt","a");
+    cpu_time = (double)(end-start)/CLOCKS_PER_SEC;
+    fprintf(out_time_file,"%lf\n", cpu_time);
 #else
     FILE *out_file = fopen("change_ans.txt","w");
     for(int i=0;i<number;i++)
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
-#endif
+    FILE *out_time_file = fopen("opt_runtime.txt","a");
     cpu_time = (double)(end-start)/CLOCKS_PER_SEC;
-    printf("%lf\n",cpu_time);
+    fprintf(out_time_file,"%lf\n", cpu_time);
+#endif
+    printf("%lf\n", cpu_time);
     return 0;
 }
