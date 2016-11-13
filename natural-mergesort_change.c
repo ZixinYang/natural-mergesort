@@ -261,7 +261,7 @@ size_t get_number_of_leading_zeros(size_t number)
         mask >>= 1;
     }
 
-    return number_of_leading_zeros;
+    return number_of_leading_zeros;    
 }
 
 size_t get_number_of_merge_passes(size_t runs) //not understand
