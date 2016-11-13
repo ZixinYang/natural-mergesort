@@ -39,6 +39,7 @@ int main(void)
         fscanf(fp, "%lf\n", &opt_runtime);
         opt_sum += opt_runtime;
     }
+    fprintf(output," ,");
     fprintf(output, "%lf,%lf\n",orig_sum / 100.0, opt_sum / 100.0);
     fclose(output); 
     fclose(fp);
