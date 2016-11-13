@@ -3,3 +3,5 @@
 gen_testcase
 natural-mergesort
 natural-mergesort_change
+perf.data
+perf.data.old
