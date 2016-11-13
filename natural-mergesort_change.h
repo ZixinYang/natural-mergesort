@@ -42,8 +42,7 @@ void merge(void *source,
            size_t size,
            size_t offset,
            size_t left_run_length,
-           size_t right_run_length,
-           int (*cmp)(const void*, const void*));
+           size_t right_run_length);
 
 size_t get_number_of_leading_zeros(size_t number);
 

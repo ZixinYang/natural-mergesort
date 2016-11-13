@@ -5,6 +5,11 @@
 #include <stdbool.h>
 #include "natural-mergesort_change.h"
 
+inline __attribute__((always_inline)) int cmp(const void *a,const void *b)
+{
+    return *(int *)a - *(int *)b;
+}
+
 //get 2^n
 size_t fix_capacity(size_t capacity)
 {
@@ -213,8 +218,7 @@ void merge(void *source,
            size_t size,
            size_t offset,
            size_t left_run_length,
-           size_t right_run_length,
-           int (*cmp)(const void*, const void*))
+           size_t right_run_length)
 {
     size_t left  = offset;
     size_t right = left + left_run_length;
@@ -360,8 +364,7 @@ void stable_sort(void *base, size_t num, size_t size, int (*comparator)(const vo
               size,
               offset,
               left_run_length,
-              right_run_length,
-              comparator);
+              right_run_length);
 
         run_length_queue_enqueue(queue, left_run_length + right_run_length); //put into queue
         runs_remaining -= 2;
