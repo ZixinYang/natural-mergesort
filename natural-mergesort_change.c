@@ -222,13 +222,6 @@ void merge(void *source,
     const size_t right_bound = right + right_run_length;
     size_t target_index = offset;
 
-    if (left_run_length + right_run_length < 7) {
-        qsort (source + left, left_run_length + right_run_length, size, cmp);
-        memcpy((char*) target + target_index, (char*) source + offset, size * (left_run_length + right_run_length));
-    }
-
-    else {
-
     int conti = 0, conti_times_right = 0, conti_times_left = 0;
 
     while (left + conti_times_left < left_bound && right + conti_times_right < right_bound) {
@@ -266,8 +259,6 @@ void merge(void *source,
     memcpy(((char*) target) + size * target_index,
            ((char*) source) + size * right,
            (right_bound - right) * size);
-
-    }
 
 }
 
