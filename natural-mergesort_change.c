@@ -233,7 +233,6 @@ void merge(void *source,
                 left += conti_times_left;
                 target_index += conti_times_left;
                 conti_times_left = 0;
-                conti = 0;
             }
             conti = 0;
             conti_times_right++;
@@ -245,11 +244,27 @@ void merge(void *source,
                 right += conti_times_right;
                 target_index += conti_times_right;
                 conti_times_right = 0;
-                conti = 1;
             }
             conti = 1;
             conti_times_left++;
         }
+    }
+
+    if (conti == 1 && conti_times_left != 0) {
+         memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * left,
+                       size * conti_times_left);
+         left += conti_times_left;
+         target_index += conti_times_left;
+         conti_times_left = 0;
+    } 
+    if (conti == 0 && conti_times_right != 0) {
+                memcpy(((char*) target) + size * target_index,
+                       ((char*) source) + size * right,
+                       size*conti_times_right);
+                right += conti_times_right;
+                target_index += conti_times_right;
+                conti_times_right = 0;
     }
 
     memcpy(((char*) target) + size * target_index,
