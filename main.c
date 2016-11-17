@@ -40,7 +40,7 @@ int main()
         fprintf(out_file, "%d ", input_array[i]);
     fclose(out_file);
     FILE *out_time_file = fopen("orig_runtime.txt","a");
-    cpu_time = (double)((end-start)*10000000000)/CLOCKS_PER_SEC;
+    cpu_time = (double)((end-start)*1000000000)/CLOCKS_PER_SEC;
     fprintf(out_time_file,"%lf\n", cpu_time);
 #else
     FILE *out_file = fopen("change_ans.txt","w");
