@@ -12,7 +12,7 @@ natural-mergesort_change: $(SRCS) natural-mergesort_change.h natural-mergesort_c
 	$(CC) $(CFLAGS) -DIMPL="\"$@.h\"" -o $@ $(SRCS) $@.c
 
 gen_testcase: gen_testcase.c
-	$(CC) $(CFLAGS) -o $@ $@.c
+	$(CC) $(CFLAGS) -o $@ $@.c	
 
 test: $(EXEC)
 	perf stat --repeat 100 \
